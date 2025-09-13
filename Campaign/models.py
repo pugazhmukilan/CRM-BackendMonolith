@@ -22,3 +22,27 @@ class ResultModel(BaseModel):
 class CompletionResponseModel(BaseModel):
     status :Literal["success", "error"]
     successCount: int
+
+
+class SavedCampaignModel(BaseModel):
+    status:Literal["failed","saved"]
+    name:str
+    campaign_id:Optional[str]
+
+class CampaignModel(BaseModel):
+    name: str
+    pipeline: List[Any]
+    created_at: Optional[str] = None
+    customers: List[Any]
+    status:Literal["Completed","NotCompleted"]
+
+
+
+class ContentMailModel(BaseModel):
+
+    message: str
+    email: EmailStr
+    
+
+class StartCampaignRequest(BaseModel):
+    campaign_id: str

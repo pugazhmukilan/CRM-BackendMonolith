@@ -3,6 +3,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from auth.routes import router as auth_router
 from DataIngestion.routes import router as data_router
 from Campaign.routes import router as campaign_router
+from HomepageCampaign.routes import router as homepage_campaign_router
 from dotenv import load_dotenv  
 import os
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,7 +27,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(data_router)
 app.include_router(campaign_router)
-
+app.include_router(homepage_campaign_router)
 @app.get("/health")
 async def root():
     return {"message": "Welcome to the Mini CRM Auth Service"}

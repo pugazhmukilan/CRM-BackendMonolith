@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from db import users_col
-from .jwt_handler import decode_token
+
 import os
 from dotenv import load_dotenv
 load_dotenv()

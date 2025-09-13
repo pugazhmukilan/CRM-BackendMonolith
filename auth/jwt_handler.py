@@ -1,11 +1,14 @@
 import os
 from datetime import datetime, timedelta
 from jose import jwt
-from dotenv import load_dotenv  
+from dotenv import load_dotenv
+
+from auth.verify_token import JWT_SECRET  
 load_dotenv() 
 SECRET_KEY = os.getenv("JWT_SECRET", "supersecret")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+ACCESS_TOKEN_EXPIRE_MINUTES = 120
+JWT_SECRET = os.getenv("JWT_SECRET")
 
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -15,4 +18,4 @@ def create_access_token(data: dict):
 
 
 def decode_token(token:str):
-    return jwt.decode(token)
+    return jwt.decode(token,algorithms=ALGORITHM,key=JWT_SECRET) 

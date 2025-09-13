@@ -7,3 +7,4 @@ client = MongoClient(MONGO_URL)
 db = client["mini_crm"]
 users_col = db["users"]
 customers_col = db["customers"]
+campaigns_col = db["campaigns"]
