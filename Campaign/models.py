@@ -1,11 +1,11 @@
-from pydantic import BaseModel,EmailStr
+from pydantic import BaseModel
 from typing import List, Optional,Any,Literal
 
 class CampaignModel(BaseModel):
     pipeline:List[dict[str,Any]]
 
 class EmailContentModel(BaseModel):
-    users:List[EmailStr]
+    users:List[str]
     content :List[str]
 
 
@@ -41,7 +41,7 @@ class CampaignModel(BaseModel):
 class ContentMailModel(BaseModel):
 
     message: str
-    email: EmailStr
+    email: str
     
 
 class StartCampaignRequest(BaseModel):

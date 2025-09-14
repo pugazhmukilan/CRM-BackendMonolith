@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field
 from typing import List, Dict, Optional,Literal
 from datetime import datetime
 import re
@@ -6,7 +6,7 @@ import re
 class Customer(BaseModel):
     customer_id: str = Field(..., min_length=1, description="Unique customer identifier")
     name: str = Field(..., min_length=1, description="Customer's full name")
-    email: EmailStr = Field(..., description="Customer's email address")
+    email: str = Field(..., description="Customer's email address")
     totalpurchase: int = Field(..., ge=0, description="Total number of purchases")
     lastactive: int = Field(..., ge=0, description="Last active timestamp (Unix epoch seconds)")
     favitem: str = Field(..., min_length=1, description="Customer's favorite product or item")
