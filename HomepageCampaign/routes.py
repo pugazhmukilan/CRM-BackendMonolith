@@ -12,7 +12,7 @@ router = APIRouter(prefix="/homepagecampaign", tags=["HomepageCampaign"])
 
 @router.get("/getcampagins",response_model =CampaignListResponseModel) 
 async def get_campaigns():
-    result = campaigns_col.find({})
+    result = campaigns_col.find({}).sort("created_at",1)
     campaigns = list(result)
     
     serialize_docs = [serialize_doc(d) for d in campaigns]
