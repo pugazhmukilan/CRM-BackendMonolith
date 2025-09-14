@@ -51,82 +51,29 @@ def publish_message(channel, queue_name, message):
         )
 
 
-# @router.post("/startcampaign", response_model=CompletionResponseModel, status_code=status.HTTP_202_ACCEPTED)
-# def start_campaign(request: StartCampaignRequest,claim:dict=Depends(verify_token)):
-#     """
-#     Publishes email campaign messages to RabbitMQ instead of sending directly.
-#     """
-#     try:
-#         mailids = campaigns_col.find_one({"_id": ObjectId(request.campaign_id)},{"customers": 1})
-#         print(mailids)
-#         # mails = await generatecontentformail(mailids)
-#         # print("generatedmailids content")
-#         connection = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URL))
-#         channel = connection.channel()
-#         channel.queue_declare(queue="email_queue", durable=True)
-
-#         success = 0
-#         print("starting the queueing operation")
-#         # for email, message in zip(mails.users, mails.content):
-#         #     payload = {"email": email, "message": message}
-#         #     publish_message(channel=channel, queue_name="email_queue", message=payload)
-#         #     print(f"Queued email to {email}")
-#         #     success += 1
-#         try:
-
-#             for mailid in mailids["customers"]:
-#                 cust_info = customers_col.find_one({"_id": ObjectId(mailid["_id"])}, {"_id": 0})
-#                 if not cust_info:
-#                     print(f"Customer with ID {mailid} not found.")
-#                     continue
-
-#                 email_body = "here is your discount coupon code: WELCOME10\n\n"
-#                 payload = {
-#                     "email": cust_info["email"],
-#                     "message": email_body
-#                 }
-#                 publish_message(channel=channel, queue_name="email_queue", message=payload)
-#                 print(f"Queued email to {cust_info['email']}")
-#                 success += 1
-
-#             connection.close()
-#         except Exception as e:
-#             print(f"Error during queuing: {e}")
-
-#         return CompletionResponseModel(
-#             status="success",
-#             successCount=success
-#         )
-
-#     except Exception as e:
-#         raise HTTPException(
-#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             detail=f"Unexpected error: {e}"
-#         )
-
 @router.post("/startcampaign", response_model=CompletionResponseModel, status_code=status.HTTP_202_ACCEPTED)
 def start_campaign(request: StartCampaignRequest,claim:dict=Depends(verify_token)):
     """
     Publishes email campaign messages to RabbitMQ instead of sending directly.
     """
     try:
-        campaign_data = campaigns_col.find_one({"_id": ObjectId(request.campaign_id)})
-        
-        # If pipeline was stored as string, parse it back (for future use if needed)
-        if 'pipeline' in campaign_data and isinstance(campaign_data['pipeline'], str):
-            campaign_data['pipeline'] = json.loads(campaign_data['pipeline'])
-        
-        mailids = {"customers": campaign_data.get("customers", [])}
+        mailids = campaigns_col.find_one({"_id": ObjectId(request.campaign_id)},{"customers": 1})
         print(mailids)
-        
+        # mails = await generatecontentformail(mailids)
+        # print("generatedmailids content")
         connection = pika.BlockingConnection(pika.URLParameters(RABBITMQ_URL))
         channel = connection.channel()
         channel.queue_declare(queue="email_queue", durable=True)
 
         success = 0
         print("starting the queueing operation")
-        
+        # for email, message in zip(mails.users, mails.content):
+        #     payload = {"email": email, "message": message}
+        #     publish_message(channel=channel, queue_name="email_queue", message=payload)
+        #     print(f"Queued email to {email}")
+        #     success += 1
         try:
+
             for mailid in mailids["customers"]:
                 cust_info = customers_col.find_one({"_id": ObjectId(mailid["_id"])}, {"_id": 0})
                 if not cust_info:
@@ -159,13 +106,13 @@ def start_campaign(request: StartCampaignRequest,claim:dict=Depends(verify_token
 
 
 
-
 # @router.post("/savecampaign",status_code=status.HTTP_201_CREATED,response_model=SavedCampaignModel)
 # async def save_campaign(campaign: CampaignModel,claim:dict=Depends(verify_token)):
 #     """Saves a campaign to the database."""
 #     try:
 #         campaign_dict = campaign.model_dump()
-#         result = campaigns_col.insert_one(campaign_dict)
+#         result = campaigns_col.insert_one(campaign)
+#         print(result)
 #         if result.inserted_id:
 #             return SavedCampaignModel(
 #                 status="saved",
@@ -183,17 +130,24 @@ def start_campaign(request: StartCampaignRequest,claim:dict=Depends(verify_token
 #             detail=f"Unexpected error: {e}"
 #         )
 
-@router.post("/savecampaign",status_code=status.HTTP_201_CREATED,response_model=SavedCampaignModel)
-async def save_campaign(campaign: CampaignModel,claim:dict=Depends(verify_token)):
+@router.post("/savecampaign", status_code=status.HTTP_201_CREATED, response_model=SavedCampaignModel)
+async def save_campaign(campaign: CampaignModel, claim: dict = Depends(verify_token)):
     """Saves a campaign to the database."""
     try:
+        print(f"[DEBUG] Received campaign: {campaign}")
+        print(f"[DEBUG] User claim: {claim}")
+        
         campaign_dict = campaign.model_dump()
         
-        # Convert pipeline to string to avoid MongoDB $ key restriction
-        if 'pipeline' in campaign_dict and campaign_dict['pipeline']:
+        # Convert the pipeline field to a JSON string
+        if 'pipeline' in campaign_dict and isinstance(campaign_dict['pipeline'], list):
             campaign_dict['pipeline'] = json.dumps(campaign_dict['pipeline'])
+            print(f"[DEBUG] Serialized pipeline: {campaign_dict['pipeline']}")
+        
+        print(f"[DEBUG] Campaign dict: {campaign_dict}")
         
         result = campaigns_col.insert_one(campaign_dict)
+        print(f"[DEBUG] Insert result: {result}")
         
         if result.inserted_id:
             return SavedCampaignModel(
@@ -202,6 +156,7 @@ async def save_campaign(campaign: CampaignModel,claim:dict=Depends(verify_token)
                 campaign_id=str(result.inserted_id)
             )
         else:
+            print("[ERROR] No inserted_id returned from database")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to save campaign"
@@ -210,5 +165,5 @@ async def save_campaign(campaign: CampaignModel,claim:dict=Depends(verify_token)
         print(f"[ERROR] Exception: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error: {type(e).__name__}: {str(e)}"
+            detail=f"Unexpected error: {e}"
         )

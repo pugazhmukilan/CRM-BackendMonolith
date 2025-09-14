@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import jwt
+# import jwt
+from jose import jwt
 from db import users_col
 
 import os
@@ -14,7 +15,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
        
-        userinfo = jwt.decode(token,algorithms=[ALGORITHM],key=JWT_SECRET)  # your decode logic
+        userinfo = jwt.decode(token,algorithms=ALGORITHM,key=JWT_SECRET)  # your decode logic
        
         useremail = userinfo["sub"]
        

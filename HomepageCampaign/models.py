@@ -16,11 +16,6 @@ class CampaignResponseModel(BaseModel):
     customers: list
     status: str
 
-    class Config:
-        allow_population_by_field_name = True
-        json_encoders = {
-            bson.ObjectId: str
-        }
 
 class CampaignListResponseModel(BaseModel):
     success: bool = True

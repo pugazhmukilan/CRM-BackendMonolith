@@ -1,4 +1,5 @@
 from http.client import HTTPException
+import json
 from bson import ObjectId
 from fastapi import APIRouter, Depends
 from db  import campaigns_col
@@ -14,6 +15,21 @@ router = APIRouter(prefix="/homepagecampaign", tags=["HomepageCampaign"])
 async def get_campaigns():
     result = campaigns_col.find({}).sort("created_at",1)
     campaigns = list(result)
+    
+    # serialize_docs = [serialize_doc(d) for d in campaigns]
+   
+    # return CampaignListResponseModel(
+    #     success=True,
+    #     count=len(serialize_docs),
+    #     campaigns=serialize_docs
+    # )
+    for campaign in campaigns:
+        if 'pipeline' in campaign and isinstance(campaign['pipeline'], str):
+            try:
+                campaign['pipeline'] = json.loads(campaign['pipeline'])
+            except (json.JSONDecodeError, TypeError):
+                # If parsing fails, set to empty list or keep as is
+                campaign['pipeline'] = []
     
     serialize_docs = [serialize_doc(d) for d in campaigns]
    
