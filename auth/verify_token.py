@@ -14,7 +14,7 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     try:
         token = credentials.credentials
        
-        userinfo = jwt.decode(token,algorithms=ALGORITHM,key=JWT_SECRET)  # your decode logic
+        userinfo = jwt.decode(token,algorithms=[ALGORITHM],key=JWT_SECRET)  # your decode logic
        
         useremail = userinfo["sub"]
        
