@@ -10,7 +10,7 @@ from auth.verify_token import verify_token
 router = APIRouter(prefix="/homepagecampaign", tags=["HomepageCampaign"])
 
 
-@router.get("/getcampagins",response_model =CampaignListResponseModel) 
+@router.get("/getcampaigns",response_model =CampaignListResponseModel) 
 async def get_campaigns():
     result = campaigns_col.find({}).sort("created_at",1)
     campaigns = list(result)
