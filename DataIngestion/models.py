@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Dict, Optional,Literal
 from datetime import datetime
 import re
@@ -17,37 +17,37 @@ class Customer(BaseModel):
     loyalty_status: str = Field(default="Bronze", description="Loyalty tier (Bronze, Silver, Gold)")
     last_purchase_date: Optional[datetime] = Field(None, description="Date of most recent purchase")
 
-    @field_validator("email")
-    def validate_email(cls, value):
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if not re.match(email_pattern, value):
-            raise ValueError("Invalid email format")
-        return value
+    # @field_validator("email")
+    # def validate_email(cls, value):
+    #     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    #     if not re.match(email_pattern, value):
+    #         raise ValueError("Invalid email format")
+    #     return value
 
-    @field_validator("preferred_categories")
-    def validate_categories(cls, value):
-        valid_categories = ["Electronics", "Clothing", "Books", "Home", "Toys", "Food", "Other"]
-        for category in value:
-            if category not in valid_categories:
-                raise ValueError(f"Invalid category: {category}. Must be one of {valid_categories}")
-        return value
+    # @field_validator("preferred_categories")
+    # def validate_categories(cls, value):
+    #     valid_categories = ["Electronics", "Clothing", "Books", "Home", "Toys", "Food", "Other"]
+    #     for category in value:
+    #         if category not in valid_categories:
+    #             raise ValueError(f"Invalid category: {category}. Must be one of {valid_categories}")
+    #     return value
 
-    @field_validator("loyalty_status")
-    def validate_loyalty_status(cls, value):
-        valid_statuses = ["Bronze", "Silver", "Gold"]
-        if value not in valid_statuses:
-            raise ValueError(f"Invalid loyalty status: {value}. Must be one of {valid_statuses}")
-        return value
+    # @field_validator("loyalty_status")
+    # def validate_loyalty_status(cls, value):
+    #     valid_statuses = ["Bronze", "Silver", "Gold"]
+    #     if value not in valid_statuses:
+    #         raise ValueError(f"Invalid loyalty status: {value}. Must be one of {valid_statuses}")
+    #     return value
 
-    @field_validator("purchase_history")
-    def validate_purchase_history(cls, value):
-        required_keys = {"product_id", "product_name", "category", "price", "purchase_date"}
-        for purchase in value:
-            if not all(key in purchase for key in required_keys):
-                raise ValueError(f"Purchase missing required fields: {required_keys}")
-            if not isinstance(purchase["price"], (int, float)) or purchase["price"] < 0:
-                raise ValueError("Purchase price must be a non-negative number")
-        return value
+    # @field_validator("purchase_history")
+    # def validate_purchase_history(cls, value):
+    #     required_keys = {"product_id", "product_name", "category", "price", "purchase_date"}
+    #     for purchase in value:
+    #         if not all(key in purchase for key in required_keys):
+    #             raise ValueError(f"Purchase missing required fields: {required_keys}")
+    #         if not isinstance(purchase["price"], (int, float)) or purchase["price"] < 0:
+    #             raise ValueError("Purchase price must be a non-negative number")
+    #     return value
     
 
 
