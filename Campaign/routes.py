@@ -107,25 +107,69 @@ def start_campaign(request: StartCampaignRequest,claim:dict=Depends(verify_token
 
 
 
+# @router.post("/savecampaign",status_code=status.HTTP_201_CREATED,response_model=SavedCampaignModel)
+# async def save_campaign(campaign: CampaignModel,claim:dict=Depends(verify_token)):
+#     """Saves a campaign to the database."""
+#     try:
+#         campaign_dict = campaign.model_dump()
+#         result = campaigns_col.insert_one(campaign_dict)
+#         if result.inserted_id:
+#             return SavedCampaignModel(
+#                 status="saved",
+#                 name=campaign.name,  # You can modify this to accept a name from the request
+#                 campaign_id=str(result.inserted_id)
+#             )
+#         else:
+#             raise HTTPException(
+#                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#                 detail="Failed to save campaign"
+#             )
+#     except Exception as e:
+#         raise HTTPException(
+#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             detail=f"Unexpected error: {e}"
+#         )
+
+
 @router.post("/savecampaign",status_code=status.HTTP_201_CREATED,response_model=SavedCampaignModel)
 async def save_campaign(campaign: CampaignModel,claim:dict=Depends(verify_token)):
     """Saves a campaign to the database."""
     try:
+        print(f"[DEBUG] Received campaign: {campaign}")
+        print(f"[DEBUG] User claim: {claim}")
+        
         campaign_dict = campaign.model_dump()
+        print(f"[DEBUG] Campaign dict: {campaign_dict}")
+        print(f"[DEBUG] Database collection status: {campaigns_col}")
+        
         result = campaigns_col.insert_one(campaign_dict)
+        print(f"[DEBUG] Insert result: {result}")
+        print(f"[DEBUG] Inserted ID: {result.inserted_id}")
+        
         if result.inserted_id:
-            return SavedCampaignModel(
+            response = SavedCampaignModel(
                 status="saved",
-                name=campaign.name,  # You can modify this to accept a name from the request
+                name=campaign.name,
                 campaign_id=str(result.inserted_id)
             )
+            print(f"[DEBUG] Response model: {response}")
+            return response
         else:
+            print("[ERROR] No inserted_id returned from database")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to save campaign"
             )
+    except HTTPException:
+        # Re-raise HTTP exceptions as-is
+        raise
     except Exception as e:
+        print(f"[ERROR] Exception type: {type(e).__name__}")
+        print(f"[ERROR] Exception message: {str(e)}")
+        print(f"[ERROR] Exception args: {e.args}")
+        import traceback
+        print(f"[ERROR] Full traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error: {e}"
+            detail=f"Unexpected error: {type(e).__name__}: {str(e)}"
         )
